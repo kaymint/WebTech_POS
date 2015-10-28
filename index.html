@@ -91,6 +91,74 @@
          }
       }
 
+      function displayInventory2(){
+         var theUrl="http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/products-controller.php?cmd=1";
+         var obj=sendRequest(theUrl);   //send request to the above url
+         var inventorytable = "";
+         inventorytable += '<ul class="collection">';
+
+         if(obj.result===1){          //check result
+           for(var index in obj.inventory){
+              inventorytable += '<li class="collection-item avatar">';
+             //inventorytable += "<tr id="+obj.inventory[index].product_id+">";
+             inventorytable += "<div class='title'>"+obj.inventory[index].product_name+"</div>";
+             inventorytable += "<input type=hidden name=id value ="+obj.inventory[index].product_id+" > ";
+             inventorytable += "<div name='price'>GHS <span>"+obj.inventory[index].unit_price+"</span></div>";
+             inventorytable += "<div name='quantity'>Qty: <span>"+obj.inventory[index].quantity+"</span></div>";
+             inventorytable += '<span class="secondary-content modal-trigger" data-target="modal1" onclick=testModal('+obj.inventory[index].product_id+')>';
+             inventorytable +='<i class="material-icons">create</i></span>';
+             inventorytable += "</li>";
+           }
+           inventorytable += "</ul>";
+           $("#inventory").html(inventorytable);
+         }else{
+           Materialize.toast('Failed', 4000);
+         }
+      }
+
+      function testModal(id){
+        //alert(id);
+        getProduct(id);
+        $('.modal-trigger').leanModal({
+          complete: function() { setPrice(); }
+        });
+      }
+
+      function getProduct(id){
+        var theUrl="http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/products-controller.php?cmd=6&id="+id;
+        var obj=sendRequest(theUrl);   //send request to the above url
+        if(obj.result===1){
+          setModal(obj);
+          //alert();
+        }
+      }
+
+      function setModal(obj){
+        var editForm = "";
+        editForm += '<div class="row">';
+        editForm += '<div class="input-field col s6">';
+        editForm += '<label class="active" for="first_name">'+obj.product_name+'</label>';
+        editForm += '<input value="'+obj.unit_price+'" id="obj_price" type="text" class="validate">';
+        editForm += '<input type="hidden" value="'+obj.product_id+'" id="obj_id" >';
+        editForm += '</div>';
+        editForm += '</div>';
+        $('#edit_form').html(editForm);
+      }
+
+      function setPrice(){
+        var price = $('#obj_price').val();
+        var id = $('#obj_id').val();
+        
+        var theUrl="http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos2/controllers/products-controller.php?cmd=3&id="+id+"&price="+price;
+        var obj=sendRequest(theUrl);   //send request to the above url
+        if(obj.result===1){
+          //alert();
+          Materialize.toast('Price Set Successfully', 4000);
+        }else{
+          Materialize.toast('Could Not Price Set', 4000);
+        }
+      }
+
       function addProduct(){
         var id = $("#barcode").val();
         var name = $("#name").val();
@@ -134,7 +202,7 @@
 
     $(function(){
          $("#inv").click(function(){
-          displayInventory();
+          displayInventory2();
          });
     });
 
