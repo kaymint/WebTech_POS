@@ -14,12 +14,6 @@
      <script type="text/javascript" src="assets/js/materialize.js"></script>
      <script src="cordova.js"></script>
      <script>
-
-        //array
-        quantity = [];
-        unit_price = [];
-        
-
        // Function to send ajax request
        function sendRequest(u){
          // Send request to server
@@ -31,62 +25,73 @@
          return result; //return object
        }
 
+
+      //  $(document).ready(function()
+      //  {
+      //    displayContacts();
+      //  });
+
+       $(document).ready(function()
+       {
+         displayInventory();
+       });
+
        //sales
        function displaySales(){
+
+        var theUrl="http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/sales-controller.php?cmd=2";
+         var obj=sendRequest(theUrl);   //send request to the above url
+         var inventorytable = "";
+         inventorytable += "<table class='highlight'>";
+         inventorytable += "<thead><tr>";
+         inventorytable += "<th data-field='name'>Product</th>";
+         inventorytable += "<th data-field='price'>Total Price</th>";
+         inventorytable += "<th data-field='quantity'>Quantity</th>";
+         inventorytable += "<th data-field='quantity'>Date</th>";
+         inventorytable += "</tr></thead><tbody>";
+
+         if(obj.result===1){          //check result
+           for(var index in obj.sales){
+             inventorytable += "<tr>";
+             inventorytable += "<td>"+obj.sales[index].product_name+"</td>";
+             inventorytable += "<td>"+obj.sales[index].total_price+"</td>";
+             inventorytable += "<td>"+obj.sales[index].quantity_purchased+"</td>";
+             inventorytable += "<td>"+obj.sales[index].date_purchased+"</td>";
+             inventorytable += "</tr>";
+           }
+           inventorytable += "</tbody></table>";
+           $("#sales").html(inventorytable);
+         }else{
+           Materialize.toast('Failed', 4000);
+         }
        }
 
        // Function to display all contacts
 
-       function displayProduct(){
-         var id = $('#barcode').val();
-         var theUrl="http://localhost/mobile-web/pos/controllers/products-controller.php?cmd=6&id="+id;
+       function displayInventory(){
+         var theUrl="http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/products-controller.php?cmd=1";
          var obj=sendRequest(theUrl);   //send request to the above url
          var inventorytable = "";
+         inventorytable += "<table class='highlight'>";
+         inventorytable += "<thead><tr>";
+         inventorytable += "<th data-field='name'>Name</th>";
+         inventorytable += "<th data-field='price'>Price</th>";
+         inventorytable += "<th data-field='quantity'>Quantity</th>";
+         inventorytable += "</tr></thead><tbody>";
 
-
-
-         if(obj.result===1){  
-             inventorytable += "<tr id="+obj.product_id+">";
-             inventorytable += "<td name='name'>"+obj.product_name+"</td>";
-             inventorytable += "<td name='price'>"+obj.unit_price+"</td>";
-             inventorytable += "<td ><input type='number' name='qty' min='0' max='"+obj.quantity+"' value='1'";
-             inventorytable += " step='1' onclick='getTotal()'></td>";
+         if(obj.result===1){          //check result
+           for(var index in obj.inventory){
+             inventorytable += "<tr id="+obj.inventory[index].product_id+">";
+             inventorytable += "<td>"+obj.inventory[index].product_name+"</td>";
+             inventorytable += "<td>"+obj.inventory[index].unit_price+"</td>";
+             inventorytable += "<td>"+obj.inventory[index].quantity+"</td>";
              inventorytable += "</tr>";
-
-           $("#product").append(inventorytable);
-           getTotal();
+           }
+           inventorytable += "</tbody></table>";
+           $("#inventory").html(inventorytable);
          }else{
            Materialize.toast('Failed', 4000);
          }
-      }
-
-      function getTotal(){
-       
-        //var price = $("td[name=price]").text();
-        //var qty = $("input[name=qty]").val();
-        // var qty = $(id).val();
-        // var price = $(id).closest("td[name=price]").text();
-        // alert(price);
-        $('input[name=qty]').each(function(index, el){
-          var elem = $(el);
-          //alert($(elem).val());
-          quantity[index] = $(elem).val();
-          //alert(quantity[index]);
-        });
-
-        $("td[name=price]").each(function(index, el){
-          var elem = $(el);
-          //alert($(elem).val());
-          unit_price[index] = $(elem).text();
-          //alert(unit_price[index]);
-        });
-        var total = 0;
-        for( i = 0; i < quantity.length; i++){
-          total += quantity[i] * unit_price[i];
-          //alert(total);
-        }
-        $("#disabled").val(total);
-        
       }
 
       function addProduct(){
@@ -95,7 +100,7 @@
         var desc = $("#desc").val();
         var qty = $("#quantity").val();
         var price = $("#price").val();
-        var theUrl = "http://localhost/mobile-web/pos/controllers/products-controller.php?cmd=2&id="+id+"&name="+name+"&desc="+desc+"&qty="+qty+"&price="+price;
+        var theUrl = "http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/products-controller.php?cmd=2&id="+id+"&name="+name+"&desc="+desc+"&qty="+qty+"&price="+price;
         var obj=sendRequest(theUrl);    //send request to the above url
         if(obj.result ===1){
           //alert("added");
@@ -119,8 +124,8 @@
 
     $(function(){
          $("#scan").click(function(){
-           addReading();
-           //Materialize.toast('Not Added', 4000);
+           //addReading();
+           //alert("");
          });
     });
 
@@ -132,13 +137,13 @@
 
     $(function(){
          $("#inv").click(function(){
-          //displayProduct();
+          displayInventory();
          });
     });
 
     $(function(){
-         $("#get_product").click(function(){
-          displayProduct();
+         $("#sale").click(function(){
+          displaySales();
          });
     });
 
@@ -163,66 +168,79 @@
                 
                 <div class="col s12">
                   <ul class="tabs">
-                    <li class="tab col s12"><a class="active" id="inv" href="#sales">Inventory</a></li>
+                    <li class="tab col s3"><a class="active" id="inv" href="#inventory">Inventory</a></li>
+                    <li class="tab col s3"><a id="sale" href="#sales">Sales</a></li>
+                    <li class="tab col s3"><a id="products" href="#add_product">Add Product</a></li>
                   </ul>
                 </div>
                 
+                <div id="inventory" class="col s12">
+                    
+                </div>
+                
                 <div id="sales" class="col s12">
+                </div>
+                
+                <div id="add_product" class="col s12">
+                  <!-- Add Product Form-->
                     <div class="row">
-                          <div class="input-field col s6">
-                            <i class="material-icons prefix">account_circle</i>
+                      <form class="col s12">
+
+                        <div class="row">
+                          <div class="input-field col s12">
+                            <!-- <i class="material-icons prefix">account_circle</i> -->
+                            <input id="name" type="text" class="validate">
+                            <label for="name">Product Name</label>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="input-field col s12">
+                            <!-- <i class="material-icons prefix">phone</i> -->
+                            <input id="desc" type="tel" class="validate">
+                            <label for="description">Product Description</label>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="input-field col s12">
+                            <!-- <i class="material-icons prefix">account_circle</i> -->
+                            <input id="quantity" type="text" class="validate">
+                            <label for="qty">Quantity</label>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="input-field col s12">
+                            <!-- <i class="material-icons prefix">account_circle</i> -->
+                            <input id="price" type="text" class="validate">
+                            <label for="price">Price</label>
+                          </div>
+                        </div>
+
+                        <div class="row">
+                          <div class="input-field col s8">
+                            <!-- <i class="material-icons prefix">account_circle</i> -->
                             <input id="barcode" type="text" class="validate">
                             <label for="barcode">Barcode</label>
                           </div>
-
-                          <div class="col s3">
                           <button class="btn waves-effect waves-light cyan" type="button" name="action" id="scan">SCAN
                           </button>
                         </div>
 
-                          <div class="col s3">
-                            <button class="btn waves-effect waves-light cyan" type="button" name="get" id="get_product">GET PRODUCT
-                            </button>
-                          </div>
+                          <button class="btn waves-effect waves-light" type="button" name="action" id="add_button">ADD
+                            <!-- <i class="material-icons right">add_circle</i> -->
+                          </button>
 
-                      </div>
-
-                      <div class="row">
-                        <div id="sales_form" class="col s12">
-                          <table class='highlight'>
-                            <thead>
-                              <tr>
-                                <th>Product</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                              </tr>
-                            </thead>
-                            <tbody id="product">
-                            </tbody>
-                          </table>
-                        </div>
-
-                        <div>
-                          <div class="row">
-                            <div class="input-field col s12">
-                              <input disabled value="0.00" id="disabled" type="text" class="validate">
-                              <label for="disabled">Total</label>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row">
-                          <div class="col s12">
-                            <button class="btn waves-effect waves-light teal" type="button" name="get" id="save">SAVE
-                            </button>
-                          </div>
-                        </div>
-
-                      </div>
-                </div>
-
+                      </form>
+                    </div>
                 </div>
               </div>
       </div>
+
+
+    
+    
 
 </body>
 </html>

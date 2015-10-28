@@ -18,6 +18,8 @@
         //array
         quantity = [];
         unit_price = [];
+        product_ids = [];
+        unit_totals = [];
         
 
        // Function to send ajax request
@@ -35,17 +37,23 @@
        function displaySales(){
        }
 
+
+       function showId(){
+
+       }
+
        // Function to display all contacts
 
        function displayProduct(){
          var id = $('#barcode').val();
-         var theUrl="http://localhost/mobile-web/pos/controllers/products-controller.php?cmd=6&id="+id;
+         var theUrl="http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/products-controller.php?cmd=6&id="+id;
          var obj=sendRequest(theUrl);   //send request to the above url
          var inventorytable = "";
 
 
 
-         if(obj.result===1){  
+         if(obj.result===1){ 
+              product_ids.push(obj.product_id); 
              inventorytable += "<tr id="+obj.product_id+">";
              inventorytable += "<td name='name'>"+obj.product_name+"</td>";
              inventorytable += "<td name='price'>"+obj.unit_price+"</td>";
@@ -61,12 +69,7 @@
       }
 
       function getTotal(){
-       
-        //var price = $("td[name=price]").text();
-        //var qty = $("input[name=qty]").val();
-        // var qty = $(id).val();
-        // var price = $(id).closest("td[name=price]").text();
-        // alert(price);
+
         $('input[name=qty]').each(function(index, el){
           var elem = $(el);
           //alert($(elem).val());
@@ -83,10 +86,56 @@
         var total = 0;
         for( i = 0; i < quantity.length; i++){
           total += quantity[i] * unit_price[i];
-          //alert(total);
+          unit_totals[i] = quantity[i] * unit_price[i];
         }
         $("#disabled").val(total);
-        
+      }
+
+      function showTotal(){
+        var tot = $("#disabled").val();
+        var phone = $("#phone").val();
+        var theUrl = "http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/sales-controller.php?cmd=3&total="+
+        tot+"&phone="+phone;
+        var obj=sendRequest(theUrl);    //send request to the above url
+        if(obj.result ===1){
+          Materialize.toast('Receipt Sent', 4000);
+          if(tot >= 500 ){
+            sendSMS(phone);
+          }else{
+            $("#product").html(" ");
+            $("#phone").val(" ");
+            $("#disabled").val("0.00");
+            $("#barcode").val(" ");
+          }
+        }
+        else{
+          Materialize.toast('Could Not Send', 4000);
+        }
+      }
+
+      function sendSMS(phone){
+          $("#product").html(" ");
+          $("#phone").val(" ");
+          $("#disabled").val("0.00");
+          $("#barcode").val(" ");
+        var theUrl = "http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/send_sms.php?cmd=1&phone="+phone;
+        var obj=sendRequest(theUrl);    //send request to the above url
+      }
+
+
+      function sendSales(){
+        for(i = 0; i < quantity.length; i++){
+          var theUrl = "http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/sales-controller.php?cmd=1&id="+
+          product_ids[i]+"&qty="+quantity[i]+"&total="+unit_totals[i];
+          
+          var obj=sendRequest(theUrl);
+          if(obj.result ===1){
+            Materialize.toast('Sale Sent', 2000);
+          }else{
+            Materialize.toast('Sale Not Sent', 2000);
+          }
+        }
+        product_ids = [];
       }
 
       function addProduct(){
@@ -95,7 +144,7 @@
         var desc = $("#desc").val();
         var qty = $("#quantity").val();
         var price = $("#price").val();
-        var theUrl = "http://localhost/mobile-web/pos/controllers/products-controller.php?cmd=2&id="+id+"&name="+name+"&desc="+desc+"&qty="+qty+"&price="+price;
+        var theUrl = "http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/products-controller.php?cmd=2&id="+id+"&name="+name+"&desc="+desc+"&qty="+qty+"&price="+price;
         var obj=sendRequest(theUrl);    //send request to the above url
         if(obj.result ===1){
           //alert("added");
@@ -106,10 +155,13 @@
         }
       }
 
+
+
      function addReading(){
       cordova.plugins.barcodeScanner.scan(
             function (result) {
               $("#barcode").val(result.text);
+              displayProduct();
           }, 
           function (error) {
               alert("Scanning failed: " + error);
@@ -125,8 +177,9 @@
     });
 
     $(function(){
-         $("#add_button").click(function(){
-           addProduct();
+         $("#save").click(function(){
+           sendSales();
+           showTotal();
          });
     });
 
@@ -169,21 +222,19 @@
                 
                 <div id="sales" class="col s12">
                     <div class="row">
-                          <div class="input-field col s6">
-                            <i class="material-icons prefix">account_circle</i>
+                          <div class="input-field col s8">
                             <input id="barcode" type="text" class="validate">
                             <label for="barcode">Barcode</label>
                           </div>
 
-                          <div class="col s3">
-                          <button class="btn waves-effect waves-light cyan" type="button" name="action" id="scan">SCAN
+                          
+                          <button class="btn waves-effect waves-light cyan col s4" type="button" name="action" id="scan">SCAN
                           </button>
-                        </div>
 
-                          <div class="col s3">
+                          <!-- <div class="col s3">
                             <button class="btn waves-effect waves-light cyan" type="button" name="get" id="get_product">GET PRODUCT
                             </button>
-                          </div>
+                          </div> -->
 
                       </div>
 
@@ -210,9 +261,18 @@
                             </div>
                           </div>
                         </div>
+
+
+                        <div class="row">
+                          <div class="input-field col s12">
+                          <input type="number" class="validate" id="phone">
+                          <label for="phone">Phone</label>
+                          <div class="input-field col s12">
+                        </div>
+
                         <div class="row">
                           <div class="col s12">
-                            <button class="btn waves-effect waves-light teal" type="button" name="get" id="save">SAVE
+                            <button class="btn waves-effect waves-light teal col s12" type="button" name="save_btn" id="save">SAVE
                             </button>
                           </div>
                         </div>

@@ -27,13 +27,13 @@
         }
 
         function validateLogin(user, pass){
-  				var theUrl="http://localhost/mobile-web/pos/controllers/user-contoller.php?cmd=2&user="+user+"&pass="+pass;
+  				var theUrl="http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/controllers/user-contoller.php?cmd=2&user="+user+"&pass="+pass;
   				var obj=sendRequest(theUrl);		//send request to the above url
   				if(obj.result===1){					//check result
             if(obj.user_type == "teller"){
-              window.location.replace("http://localhost/mobile-web/pos/view/home.html");
+              window.location.replace("http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/view/home.html");
             }else{
-              window.location.replace("http://localhost/mobile-web/pos/view/admin_page.html");
+              window.location.replace("http://cs.ashesi.edu.gh/~csashesi/class2016/kenneth-mensah/pos/view/admin_page.html");
             }
   					//$("#divDesc").text(obj.desc);		//set div with the description from the result
   					//$("#divDesc").css("top",event.y);	//set the location of the div
