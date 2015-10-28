@@ -193,6 +193,8 @@
         //alert(id);
         getProduct(id);
         $('.modal-trigger').leanModal({
+          in_duration: 10, // Transition in duration
+          out_duration: 20,
           complete: function() { setPrice(); }
         });
       }
