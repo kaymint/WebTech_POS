@@ -16,6 +16,11 @@
 		<gap:platform name="android"/>
 		<gap:platform name="winphone"/>
 		<gap:splash src="res/splash.png"/>
+		<gap:plugin name="cordova-plugin-whitelist" source="npm"/>
 		<gap:plugin name="net.roughshod.plugins.barcodescanner" version="3.0.0" />
+		<allow-navigation href="*" />
+		<allow-intent href="*" />
+		<access origin="*" />
 		<icon src="res/icon.png"/>
+
 	</widget>
